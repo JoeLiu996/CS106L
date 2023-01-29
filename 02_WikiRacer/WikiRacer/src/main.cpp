@@ -12,6 +12,7 @@ using std::ifstream;        using std::stringstream;
 using std::string;          using std::vector;
 using std::priority_queue;  using std::unordered_map;
 using std::unordered_set;   using std::cin;
+using std::getline;
 
 /*
  * This is the function you will be implementing. It takes
@@ -43,9 +44,9 @@ int main() {
     /* Container to store the found ladders in */
     vector<vector<string>> outputLadders;
 
-    cout << "Enter a file name: ";
-    string filename;
-    getline(cin, filename);
+    string filename = "input-big.txt";
+    cout << "Enter a file name: " << filename << endl;
+    //getline(cin, filename);
 
     // TODO: Create a filestream from the filename.
     //       For each pair {start_page, end_page} in the input file,
@@ -53,8 +54,14 @@ int main() {
     //       and append that vector to outputLadders.
 
     // Write code here
-
-
+    ifstream in(filename, ifstream::in);
+    int pair_nums;
+    string start_page, end_page;
+    in >> pair_nums;
+    for (int i = 0; i < pair_nums; i++) {
+        in >> start_page >> end_page;
+        outputLadders.push_back(findWikiLadder(start_page, end_page));
+    }
 
     /*
      * Print out all ladders in outputLadders.
@@ -81,6 +88,7 @@ int main() {
     }
     return 0;
 }
+
 
 
 
