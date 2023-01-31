@@ -37,7 +37,57 @@ vector<string> findWikiLadder(const string& start_page, const string& end_page) 
     //       3. Finally, implement this function per Part B in the handout!
     //
     //                Best of luck!
-    return {"File reading works!", start_page, end_page};
+
+    // creates WikiScraper object
+    WikiScraper scraper;
+
+    // gets the set of links on page specified by end_page
+    // variable and stores in target_set variable
+    auto target_set = scraper.getLinkSet(end_page);
+
+    //comparison function for priority queue
+    auto cmpFn = [&scraper, &target_set](const auto& ladder1, const auto& ladder2) {
+        string page1 = ladder1.back();
+        string page2 = ladder2.back();
+        auto page1_links = scraper.getLinkSet(page1);
+        auto page2_links = scraper.getLinkSet(page2);
+        int page1_commonLinks = 0, page2_commonLinks = 0;
+        for(auto& link : target_set) {
+            if(page1_links.find(link) != page1_links.end()) {
+                page1_commonLinks++;
+            }
+            if(page2_links.find(link) != page2_links.end()) {
+                page2_commonLinks++;
+            }
+        }
+        return page1_commonLinks < page2_commonLinks;
+    };
+    // creates a priority_queue names ladderQueue
+    priority_queue<vector<string>, vector<vector<string>>, decltype(cmpFn)> ladderQueue(cmpFn);
+
+    //start bfs searching algorithm
+    unordered_map<string, int> visited;
+    ladderQueue.push(vector<string>{start_page});
+    visited[start_page] = 1;
+    while(!ladderQueue.empty()) {
+        auto ladder = ladderQueue.top();
+        ladderQueue.pop();
+        auto curr_links = scraper.getLinkSet(ladder.back());
+        if(curr_links.find(end_page) != curr_links.end()) {
+            ladder.push_back(end_page);
+            return ladder;
+        }
+        for(auto& page : curr_links) {
+            if(visited.find(page) == visited.end()) {
+                visited[page] = 1;
+                auto next_ladder(ladder);
+                next_ladder.push_back(page);
+                ladderQueue.push(next_ladder);
+            }
+        }
+    }
+
+    return {};
 }
 
 int main() {
