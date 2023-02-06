@@ -81,7 +81,7 @@ std::pair<typename HashMap<K, M, H>::value_type*, bool>
 }
 
 template <typename K, typename M, typename H>
-M& HashMap<K, M, H>::at(const K& key) {
+M& HashMap<K, M, H>::at(const K& key) const {
    auto [prev, node_found] = find_node(key);
    if (node_found == nullptr) {
        throw std::out_of_range("HashMap<K, M, H>::at: key not found");
@@ -150,7 +150,21 @@ void HashMap<K, M, H>::rehash(size_t new_bucket_count) {
 
         // Hint: you should NOT call insert, and you should not call
         // new or delete in this function. You must reuse existing nodes.
-        (void) new_buckets_array; // remove this line after you start implementing
+
+    for(auto& cur : _buckets_array) {
+        while(cur != nullptr) {
+            const auto& [key, mapped] = cur->value;
+            size_t index = _hash_function(key) % new_bucket_count;
+
+            auto temp = cur;
+            cur = cur->next;
+            //insert temp into new_buckets
+            temp->next = new_buckets_array[index];
+            new_buckets_array[index] = temp;
+        }
+    }
+
+    _buckets_array = std::move(new_buckets_array);
 
     /* end student code */
 }
@@ -171,3 +185,60 @@ void HashMap<K, M, H>::rehash(size_t new_bucket_count) {
         - move constructor
         - move assignment
 */
+
+/*Milestone 2*/
+template <typename K, typename M, typename H>
+M& HashMap<K, M, H>::operator[](const K& key) {
+    const auto& [prev, node_found] = find_node(key);
+    if (node_found == nullptr) {
+        return insert({key, {}}).first->second;
+    }
+    return node_found->value.second;
+}
+
+template <typename K, typename M, typename H>
+std::ostream& operator<<(std::ostream& os, const HashMap<K, M, H>& map) {
+    bool is_first_element = true;
+    os << "{";
+
+    for(auto cur : map._buckets_array) {
+        while(cur != nullptr) {
+            const auto& [found_key, found_mapped] = cur->value;
+            if(!is_first_element) {
+                os << ", ";
+            }
+            os << found_key << ":" << found_mapped;
+            is_first_element = false;
+            cur = cur->next;
+        }
+    }
+
+    os << "}";
+    return os;
+}
+
+template <typename K, typename M, typename H>
+bool operator==(const HashMap<K, M, H>& lhs, const HashMap<K, M, H>& rhs) {
+    if(lhs.size() != rhs.size()) {
+        return false;
+    }
+
+    for(auto cur : lhs._buckets_array) {
+        while(cur != nullptr) {
+            const auto& [lhs_found_key, lhs_found_mapped] = cur->value;
+            const auto& [prev_node, rhs_curr_node] = rhs.find_node(lhs_found_key);
+            const auto& [rhs_found_key, rhs_found_mapped] = rhs_curr_node->value;
+            if(rhs_curr_node == nullptr || lhs_found_mapped != rhs_found_mapped) {
+                return false;
+            }
+            cur = cur->next;
+        }
+    }
+    return true;
+}
+
+template <typename K, typename M, typename H>
+bool operator!=(const HashMap<K, M, H>& lhs, const HashMap<K, M, H>& rhs) {
+    return !(lhs == rhs);
+}
+

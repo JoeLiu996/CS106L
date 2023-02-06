@@ -461,7 +461,6 @@ void C_equality_operator() {
     HashMap<int, int> map1(100);
     HashMap<int, int> map2(1);
     VERIFY_TRUE(map1 == map2 && map2 == map1 && map1 == map1 && map2 == map2, __LINE__);
-
     // at this point we're assuming that all your operations
     // already work, so we're just testing whether == is correct.
 
