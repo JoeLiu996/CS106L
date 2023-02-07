@@ -72,6 +72,10 @@ public:
     */
     HashMap();
 
+    HashMap(const HashMap<K, M, H>& others);
+
+    HashMap(HashMap<K, M, H>&& others);
+
     /*
     * Constructor with bucket_count and hash function as parameters.
     *
@@ -312,6 +316,10 @@ public:
     void rehash(size_t new_buckets);
 
     M& operator[](const K& key);
+
+    HashMap<K, M, H>& operator=(const HashMap<K, M, H>& others);
+
+    HashMap<K, M, H>& operator=(HashMap<K, M, H>&& others);
 
 private:
 

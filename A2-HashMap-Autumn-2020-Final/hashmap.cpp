@@ -242,3 +242,71 @@ bool operator!=(const HashMap<K, M, H>& lhs, const HashMap<K, M, H>& rhs) {
     return !(lhs == rhs);
 }
 
+
+/*Milestone 3*/
+//copy constructor
+template <typename K, typename M, typename H>
+HashMap<K, M, H>::HashMap(const HashMap<K, M, H>& others) :
+    _size(0),
+    _hash_function(others._hash_function),
+    _buckets_array(others.bucket_count(), nullptr) {
+    for(auto cur : others._buckets_array) {
+        while(cur != nullptr) {
+            const auto& [key, mapped] = cur->value;
+            insert({key, mapped});
+            cur = cur->next;
+        }
+    }
+}
+
+//copy assignment
+template<typename K, typename M, typename H>
+HashMap<K, M, H>& HashMap<K, M, H>::operator=(const HashMap<K, M, H>& others) {
+    if(this != &others) {
+        clear();
+        //_size = others._size;
+        _hash_function = others._hash_function;
+
+        for(auto cur : others._buckets_array) {
+            while(cur != nullptr) {
+                const auto& [key, mapped] = cur->value;
+                insert({key, mapped});
+                cur = cur->next;
+            }
+        }
+    }
+
+    return *this;
+}
+
+//move constructor
+template<typename K, typename M, typename H>
+HashMap<K, M, H>::HashMap(HashMap<K, M, H>&& others) :
+    _size(std::move(others._size)),
+    _hash_function(std::move(others._hash_function)),
+    _buckets_array(others.bucket_count(), nullptr) {
+    for(int i = 0; i < others.bucket_count(); i++) {
+        _buckets_array[i] = std::move(others._buckets_array[i]);
+        others._buckets_array[i] = nullptr;
+    }
+    others.clear();
+}
+
+//move operator
+template<typename K, typename M, typename H>
+HashMap<K, M, H>& HashMap<K, M, H>::operator=(HashMap<K, M, H>&& others) {
+    if(this != &others) {
+        clear();
+        _size = std::move(others._size);
+        _hash_function = std::move(others._hash_function);
+        _buckets_array.resize(others.bucket_count());
+
+        for(int i = 0; i < others.bucket_count(); i++) {
+            _buckets_array[i] = std::move(others._buckets_array[i]);
+            others._buckets_array[i] = nullptr;
+        }
+        others.clear();
+    }
+
+    return *this;
+}
